@@ -12,7 +12,7 @@ var PORT = process.env.PORT || 3000;
 app.use(fast.static('public'));
 
 // Setting up data parsing
-app.use(fast.urlencoded({extended: true});
+app.use(fast.urlencoded({extended: true}));
 app.use(fast.json());
 
 // Page load to start with index, retrieve and listen
