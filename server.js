@@ -1,19 +1,19 @@
 // Assigning the constants 
-const fast = require("express");
+const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const database = require("./db/db")
 
-// Setting up the fast app
-var app = fast();
+// Setting up the express app
+var app = express();
 var PORT = process.env.PORT || 3000;
 
 // Linking to assets
-app.use(fast.static('public'));
+app.use(express.static('public'));
 
 // Setting up data parsing
-app.use(fast.urlencoded({extended: true}));
-app.use(fast.json());
+app.use(express.urlencoded({extended: true}));
+app.use(express.json());
 
 // Page load to start with index, retrieve and listen
 app.get("/", function (req, res) {
