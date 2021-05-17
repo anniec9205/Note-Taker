@@ -11,3 +11,18 @@ var PORT = process.env.PORT || 3000;
 // Linking to assets
 app.use(fast.static('public'));
 
+// Setting up data parsing
+app.use(fast.urlencoded({extended: true});
+app.use(fast.json());
+
+// Page load to start with index, retrieve and listen
+app.get("/", function (req, res) {
+    res.sendFile(path.join(__dirname, "/public/index.html"));
+});
+
+// Retrieve and post and delete the api endpoints
+app.route("/api/notes")
+// get the note list
+.get(function (req, res) {
+    res.json(database);
+})
