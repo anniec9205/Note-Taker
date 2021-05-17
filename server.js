@@ -26,3 +26,18 @@ app.route("/api/notes")
 .get(function (req, res) {
     res.json(database);
 })
+//  add a new note
+.post(function (req, res) {
+    let jsonFilePath = path.join(__dirname, "/db/db.json");
+    let newNote = req.body;
+    // test note written on original note
+    let highestID = 99;
+    // loop through the array to find highest ID
+    for (let i = 0; i < database.length; i++) {
+        let individualNote = database[i];
+
+        if (individualNote.id > highestID) {
+            // highestID is the highest numbered ID
+            highestID = individualNote.id;
+        }
+    }
