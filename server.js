@@ -1,58 +1,83 @@
-// Assigning the constants 
+// Import our dependencies
 const express = require("express");
 const fs = require("fs");
-const path = require("path");
-const database = require("./db/db")
 
-// Setting up the express app
-var app = express();
-var PORT = process.env.PORT || 3000;
+// Setup our express specific variables
+const app = express()
+const port = process.env.port || 3000;
 
-// Linking to assets
-app.use(express.static('public'));
-
-// Setting up data parsing
-app.use(express.urlencoded({extended: true}));
+// Allow us to access our public folder and work with our files.
+app.use(express.static('public'))
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Page load to start with index, retrieve and listen
+
+// Express Routes - GET =================================================
+// Set our "root" route
 app.get("/", function (req, res) {
-    res.sendFile(path.join(__dirname, "/public/index.html"));
+  res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
-// Retrieve and post and delete the api endpoints
-app.route("/api/notes")
-// get the note list
-.get(function (req, res) {
-    res.json(database);
-})
-//  add a new note
-.post(function (req, res) {
-    let jsonFilePath = path.join(__dirname, "/db/db.json");
-    let newNote = req.body;
-    // test note written on original note
-    let highestID = 99;
-    // loop through the array to find highest ID
-    for (let i = 0; i < database.length; i++) {
-        let individualNote = database[i];
+// Set our "notes" route.
+app.get("/notes", function (req, res) {
+  res.sendFile(path.join(__dirname, "public/notes.html"));
+});
 
-        if (individualNote.id > highestID) {
-            // highestID is the highest numbered ID
-            highestID = individualNote.id;
-        }
-    }
-    // assigning an ID to the new note
-    newNote.id = highestID + 1;
-    // pushing to db.json
-    database.push(newNote)
-    // again writing the db.json file
-    fs.writeFile(jsonFilePath, JSON.stringify(database), function (err) {
+// Set our "/api/notes" route.
+app.get("/api/notes/", function (req, res) {
+  // Read the db file so we can put it on a page
+  fs.readFile(__dirname + "/db/db.json", (err, data) => {
+    // Parse our db.json data
+    var json = JSON.parse(data);
+    return res.json(json);
+  })
+});
 
-        if (err) {
-            return console.log(err);
-        }
-        console.log("Your note was saved!");
-    });
-    // returns a new note response
-    res.json(newNote);
-    });
+// Set our "star" route as a catch-all, redirect to index.html
+app.get("*", function(req, res) {
+  res.sendFile((__dirname + "/public/index.html"));
+});
+
+// Express Routes - POST =================================================
+app.post("/api/notes/", function (req, res) {
+  newNote = req.body;
+
+  // Get the JSON file from /db/ and parse it so we can add to it
+  fs.readFile(__dirname + "/db/db.json", (err, data) => {
+    var json = JSON.parse(data);
+    // Push our new note in from our user's request.
+    json.push(newNote);
+
+    // Write the JSON file over with our new contents.
+    fs.writeFileSync(__dirname + "/db/db.json", JSON.stringify(json));
+  });
+});
+
+// Express Routes - DELETE =================================================
+// Get our id to be deleted.
+app.delete("/api/notes/:id", function (req, res) {
+  // Get the id of the note to be deleted from our request parameter (:id)
+  let response = req.params;
+  let id = response.id;
+  console.log(`Note id: ${id} marked for deletion`);
+
+  // Read our JSON file, store it as a variable so we can manipulate the data.
+  fs.readFile(__dirname + "/db/db.json", (err, data) => {
+    // Parse our returned data and store as a variable.
+    var json = JSON.parse(data);
+
+    // Filter the data, making a new array of objects without the object containing the id.
+    const filteredJson = json.filter((element) => element.id !== id);
+
+    // Write our changes to the file, db.json.
+    fs.writeFileSync(__dirname + "/db/db.json", JSON.stringify(filteredJson));
+
+  });
+
+});
+
+// Express Server =================================================
+// Start our server, listening on port 3001.
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Started server`)
+}); 
